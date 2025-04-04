@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#3498db">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'self' data: gap: 'unsafe-inline' 'unsafe-eval'; style-src * 'self' 'unsafe-inline'; script-src * 'self' 'unsafe-inline' 'unsafe-eval'; connect-src * 'self';">
+    <title>AI 文字生图-仅供张斐尧的家人们使用</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style_additions.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- PWA 支持 -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <!-- 立即隐藏加载界面 -->
+    <style>
+    .fullscreen-loading {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
+    </style>
+    <script>
+    // 立即隐藏加载动画
+    document.addEventListener('DOMContentLoaded', function() {
+        var loadingEl = document.getElementById('fullScreenLoading');
+        if (loadingEl) {
+            loadingEl.style.display = 'none';
+            loadingEl.style.visibility = 'hidden';
+            loadingEl.classList.add('hidden');
+            loadingEl.classList.remove('active');
+        }
+    });
+    // 如果5秒后仍然显示，强制隐藏
+    setTimeout(function() {
+        var loadingEl = document.getElementById('fullScreenLoading');
+        if (loadingEl) {
+            loadingEl.style.display = 'none';
+            loadingEl.style.visibility = 'hidden';
+            loadingEl.classList.add('hidden');
+            loadingEl.classList.remove('active');
+        }
+    }, 1000);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI stability文字生图-仅供张斐尧的家人们使用</h1>
+            <p class="subtitle">enjoy the creation</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <div class="prompt-container">
+                    <textarea 
+                        id="promptInput" 
+                        placeholder="请输入图片描述..."
+                        rows="4"
+                        autocomplete="off"
+                        autocorrect="off"
+                    ></textarea>
+                    <div class="prompt-tools">
+                        <button class="tool-btn" onclick="clearPrompt()" aria-label="清除">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="tool-btn" onclick="showExamples()" aria-label="示例">
+                            <i class="fas fa-lightbulb"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="setting-group">
+                        <label for="imageSize">图片尺寸</label>
+                        <select id="imageSize" aria-label="选择图片尺寸">
+                            <option value="512x512">512x512</option>
+                            <option value="768x768">768x768</option>
+                            <option value="1024x1024" selected>1024x1024</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="imageCount">生成数量</label>
+                        <select id="imageCount" aria-label="选择生成数量">
+                            <option value="1" selected>1张</option>
+                            <option value="2">2张</option>
+                            <option value="4">4张</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="styleStrength">风格强度 <span id="strengthValue">50%</span></label>
+                        <input type="range" id="styleStrength" min="0" max="100" value="50" aria-label="调整风格强度">
+                    </div>
+                </div>
+
+                <button id="generateBtn" class="primary-btn" onclick="generateImage()" aria-label="生成图片">
+                    <i class="fas fa-magic"></i> <span>生成图片</span>
+                </button>
+            </div>
+
+            <div class="result-section">
+                <div id="loadingIndicator" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>正在生成图片...</p>
+                </div>
+                
+                <div id="imageResult" class="image-container hidden">
+                    <div class="image-grid" id="imageGrid">
+                        <!-- 图片将在这里动态添加 -->
+                    </div>
+                    <div class="result-actions">
+                        <button id="downloadBtn" class="secondary-btn" onclick="downloadImage()" aria-label="下载图片">
+                            <i class="fas fa-download"></i> <span>下载图片</span>
+                        </button>
+                        <button id="regenerateBtn" class="secondary-btn" onclick="generateImage()" aria-label="重新生成">
+                            <i class="fas fa-redo"></i> <span>重新生成</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="examples-section hidden" id="examplesSection">
+            <h3>示例提示词</h3>
+            <div class="examples-grid">
+                <div class="example-card" onclick="useExample('一只可爱的柴犬在樱花树下玩耍')" tabindex="0" role="button" aria-label="示例：一只可爱的柴犬在樱花树下玩耍">
+                    <img src="https://picsum.photos/200/200?random=1" alt="柴犬示例">
+                    <p>一只可爱的柴犬在樱花树下玩耍</p>
+                </div>
+                <div class="example-card" onclick="useExample('未来城市夜景，赛博朋克风格')" tabindex="0" role="button" aria-label="示例：未来城市夜景，赛博朋克风格">
+                    <img src="https://picsum.photos/200/200?random=2" alt="赛博朋克城市示例">
+                    <p>未来城市夜景，赛博朋克风格</p>
+                </div>
+                <div class="example-card" onclick="useExample('宁静的山水画，水墨风格')" tabindex="0" role="button" aria-label="示例：宁静的山水画，水墨风格">
+                    <img src="https://picsum.photos/200/200?random=3" alt="水墨山水示例">
+                    <p>宁静的山水画，水墨风格</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部导航栏（移动端） -->
+        <nav class="mobile-nav">
+            <button class="nav-btn active" onclick="scrollToSection('.input-section')" aria-label="输入">
+                <i class="fas fa-pen-alt"></i>
+                <span>输入</span>
+            </button>
+            <button class="nav-btn" onclick="scrollToSection('.result-section')" aria-label="结果">
+                <i class="fas fa-image"></i>
+                <span>结果</span>
+            </button>
+            <button class="nav-btn" onclick="showExamples()" aria-label="示例">
+                <i class="fas fa-lightbulb"></i>
+                <span>示例</span>
+            </button>
+            <button class="nav-btn" onclick="generateImage()" aria-label="测试">
+                <i class="fas fa-vial"></i>
+                <span>测试</span>
+            </button>
+        </nav>
+    </div>
+    
+    <!-- 加载动画遮罩（默认隐藏） -->
+    <div id="fullScreenLoading" class="fullscreen-loading hidden" style="display:none !important; visibility:hidden !important; opacity:0 !important;">
+        <div class="loading-content">
+            <div class="large-spinner"></div>
+            <p class="loading-text">正在生成，请稍候...</p>
+            <!-- 关闭按钮使用双重保险 -->
+            <button onclick="hideLoading(); document.getElementById('fullScreenLoading').style.display='none'; document.getElementById('fullScreenLoading').style.visibility='hidden';" class="close-loading-btn">
+                <i class="fas fa-times-circle"></i> 关闭
+            </button>
+        </div>
+    </div>
+    
+    <!-- 调试悬浮按钮 -->
+    <button id="debugButton" class="debug-button" onclick="forceRefresh()">
+        <i class="fas fa-sync"></i>
+    </button>
+    
+    <script src="js/main.js"></script>
+</body>
+</html> 
